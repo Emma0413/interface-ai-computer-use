@@ -26,6 +26,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = ["integration: exercises the real Playwright adapter against the local demo server"]
 
 [tool.ruff]
 line-length = 100

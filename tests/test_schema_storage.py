@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from cuauto.models import CapabilityArtifact
 from cuauto.redaction import contains_secret, redact
-from cuauto.storage import ArtifactError, ArtifactStore
+from cuauto.storage import ArtifactError, ArtifactStore, atomic_write_text
 
 
 def test_round_trip(tmp_path, artifact):
@@ -58,3 +58,19 @@ def test_coordinates_must_be_fragile(artifact):
     data["steps"][1]["locators"] = [{"strategy": "coordinates", "value": "1,2"}]
     with pytest.raises(ValidationError):
         CapabilityArtifact.model_validate(data)
+
+
+def test_atomic_result_write_replaces_file_and_rejects_symlink(tmp_path):
+    result = tmp_path / "result.json"
+    result.write_text("old", encoding="utf-8")
+    atomic_write_text(result, '{"kind":"success"}')
+    assert result.read_text(encoding="utf-8") == '{"kind":"success"}'
+    assert not list(tmp_path.glob("*.tmp"))
+
+    target = tmp_path / "target.json"
+    target.write_text("protected", encoding="utf-8")
+    link = tmp_path / "link.json"
+    link.symlink_to(target)
+    with pytest.raises(ArtifactError, match="symlink"):
+        atomic_write_text(link, "overwrite")
+    assert target.read_text(encoding="utf-8") == "protected"

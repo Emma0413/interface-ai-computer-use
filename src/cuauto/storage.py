@@ -18,6 +18,28 @@ class ArtifactError(ValueError):
     pass
 
 
+def atomic_write_text(path: Path, payload: str) -> None:
+    """Durably replace a regular file without exposing a partial result."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise ArtifactError("output path cannot be a symlink")
+    fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 class ArtifactStore:
     def __init__(self, root: Path, max_bytes: int = 1_000_000):
         self.root = root.resolve()
@@ -49,14 +71,5 @@ class ArtifactStore:
             raise ArtifactError("artifact appears to contain a secret")
         if len(payload.encode()) > self.max_bytes:
             raise ArtifactError("artifact too large")
-        fd, temporary = tempfile.mkstemp(dir=self.root, prefix=".artifact-", suffix=".tmp")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                handle.write(payload)
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temporary, path)
-        finally:
-            if os.path.exists(temporary):
-                os.unlink(temporary)
+        atomic_write_text(path, payload)
         return path

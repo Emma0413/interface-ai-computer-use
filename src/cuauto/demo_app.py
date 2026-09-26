@@ -5,6 +5,7 @@ import os
 import secrets
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import cast
 from urllib.parse import parse_qs, urlsplit
 
 MEMBERS = {"M1001": ("Avery Stone", "$1,245.67"), "M2002": ("Jordan Lake", "$88.10")}
@@ -87,7 +88,9 @@ class Handler(BaseHTTPRequestHandler):
                 401,
             )
             return
-        if self.headers.get("Origin") not in {None, "http://127.0.0.1:8765"}:
+        host, port = cast(tuple[str, int], self.server.server_address)[:2]
+        expected_origin = f"http://{host}:{port}"
+        if self.headers.get("Origin") not in {None, expected_origin}:
             self._send(page("Forbidden", "<p>Origin rejected</p>"), 403)
             return
         length = min(int(self.headers.get("Content-Length", "0")), 1024)

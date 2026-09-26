@@ -91,8 +91,9 @@ rg -n -i '(password|authorization|bearer|api[_-]?key|cookie|access[_-]?token)' \
   --glob '!Assignment*.pdf' --glob '!.env.example' .
 ```
 
-The unit suite uses injected adapters/models and never incurs a model charge. Browser integration is
-the CLI demo above. The target supports not-found, validation, permission, expired-session,
+The suite uses injected adapters/models for fast coverage plus a real headless Playwright replay
+against an ephemeral localhost demo server; it never incurs a model charge. The target supports
+not-found, validation, permission, expired-session,
 application-error, delayed-load, and review-without-commit routes. Evidence persistence defaults to
 redacted DOM text; screenshots are opt-in because pixels cannot be reliably redacted here.
 

@@ -13,7 +13,7 @@ from .intervention import InterventionManager
 from .models import ActionType, CapabilityArtifact
 from .policy import AllowedTarget, PolicyConfig, PolicyEngine
 from .replay import ReplayEngine
-from .storage import ArtifactStore
+from .storage import ArtifactStore, atomic_write_text
 from .surface import PlaywrightSurface
 
 app = typer.Typer(no_args_is_help=True)
@@ -108,8 +108,7 @@ def replay(
             manager,
             Path("evidence/runtime"),
         ).run(loaded, {"member_id": member_id})
-        result.parent.mkdir(parents=True, exist_ok=True)
-        result.write_text(outcome.model_dump_json(indent=2), encoding="utf-8")
+        atomic_write_text(result, outcome.model_dump_json(indent=2))
         typer.echo(outcome.model_dump_json(indent=2))
         if outcome.kind == "failure":
             raise typer.Exit(2)
@@ -152,8 +151,7 @@ def handoff_demo(
             manager,
             Path("evidence/runtime"),
         ).run(target=target, operator=operator_prompt)
-        result.parent.mkdir(parents=True, exist_ok=True)
-        result.write_text(outcome.model_dump_json(indent=2), encoding="utf-8")
+        atomic_write_text(result, outcome.model_dump_json(indent=2))
         typer.echo(outcome.model_dump_json(indent=2))
         if outcome.kind == "failure":
             raise typer.Exit(2)

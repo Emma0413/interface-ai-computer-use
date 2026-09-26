@@ -34,8 +34,9 @@ schema.
 Results discriminate success, business outcome, escalation, and failure. Failures identify taxonomy,
 step, expected/sanitized observed state, retries, and evidence. Not-found is data, not an exception.
 Fingerprints detect discovery loops; replay event metrics and checkpoint failure rates are the drift
-signal. Production would aggregate them per vendor/version/variant and quarantine a revision when a
-threshold is crossed.
+signal. A pytest integration test starts the real demo on an ephemeral port and drives the complete
+artifact through headless Playwright without a model. Production would aggregate metrics per
+vendor/version/variant and quarantine a revision when a threshold is crossed.
 
 # 4. Heterogeneity & multi-tenant
 
@@ -72,8 +73,9 @@ blind mutation retries. Page text is labeled untrusted, observations are bounded
 output is schema validated. It cannot issue shell/code/SQL/JavaScript or arbitrary selectors.
 
 Secrets come only from environment variables. Recursive redaction covers keys, bearer values, email,
-SSN and configured fields; events are bounded and opened no-follow. Artifact writes are atomic.
-Profiles, auth state, traces, databases and `.env` are ignored. The demo binds localhost, escapes
+SSN and configured fields; events are bounded and opened no-follow. Artifact and structured-result
+writes use fsync plus atomic replacement and reject symlink destinations. Profiles, auth state,
+traces, databases and `.env` are ignored. The demo binds localhost, escapes
 fictional values, bounds requests, uses HttpOnly/SameSite session cookies and rejects cross-origin
 POSTs. This is defense-in-depth for a take-home, not a production security claim; limitations are in
 the README.
