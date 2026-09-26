@@ -1,0 +1,17 @@
+.env
+Assignment*.pdf
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.egg-info/
+playwright-report/
+test-results/
+browser-profiles/
+auth-state*.json
+*.trace.zip
+*.sqlite*
+# Runtime .so files are locally extracted; reproduce with scripts/install_browser_libs.sh.
+vendor/runtime-libs/

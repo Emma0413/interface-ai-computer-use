@@ -1,0 +1,14 @@
+{
+  "kind": "failure",
+  "error": {
+    "category": "application_error",
+    "step_id": "navigate",
+    "expected_state": "application returned HTTP 500",
+    "observed_state": "{'url': 'http://127.0.0.1:8765/error', 'title': 'Error', 'text': 'First Federal LegacyCore\\n\\nApplication error', 'controls': [], 'fingerprint': '940ecc6b7faf50f9ecbab4b15b2bda2b8e8c8f802d2d67956138d76ac29fedad'}",
+    "retry_count": 0,
+    "evidence": [
+      "evidence/runtime/e0e5dcd5cba04003955a85c3cdb79285/gxqClST40bUpT-4O7Z5sNGusF1SSjP4t-dom.txt"
+    ]
+  },
+  "run_id": "e0e5dcd5cba04003955a85c3cdb79285"
+}

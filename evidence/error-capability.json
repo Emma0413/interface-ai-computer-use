@@ -1,0 +1,209 @@
+{
+  "schema_name": "cuauto.capability",
+  "schema_version": "1.0.0",
+  "capability_id": "injected_application_error",
+  "name": "Lookup savings balance",
+  "description": "Search a synthetic member and return their savings balance.",
+  "revision": 1,
+  "vendor": "Synthetic Legacy Core",
+  "application": "Member Servicing",
+  "compatible_versions": ">=1,<2",
+  "base_url": "http://127.0.0.1:8765/",
+  "variants": [],
+  "inputs": [
+    {
+      "name": "member_id",
+      "value_type": "string",
+      "required": true,
+      "min_length": 2,
+      "max_length": 12,
+      "pattern": "^M[0-9]{4}$",
+      "sensitive": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "savings_balance",
+      "value_type": "decimal",
+      "description": "Synthetic member savings balance"
+    }
+  ],
+  "steps": [
+    {
+      "id": "navigate",
+      "action": "navigate",
+      "risk": "read_only",
+      "locators": [],
+      "value": null,
+      "destination": "http://127.0.0.1:8765/error",
+      "preconditions": [],
+      "postconditions": [],
+      "wait": null,
+      "timeout_ms": 5000,
+      "retry": {
+        "max_attempts": 1,
+        "backoff_ms": 100,
+        "safe_only": true
+      },
+      "extraction": null
+    },
+    {
+      "id": "step_1",
+      "action": "fill",
+      "risk": "read_only",
+      "locators": [
+        {
+          "strategy": "label",
+          "value": "Member number",
+          "role": null,
+          "scope": null,
+          "attribute": null,
+          "fragile": false
+        }
+      ],
+      "value": {
+        "param": "member_id"
+      },
+      "destination": null,
+      "preconditions": [],
+      "postconditions": [],
+      "wait": null,
+      "timeout_ms": 5000,
+      "retry": {
+        "max_attempts": 1,
+        "backoff_ms": 100,
+        "safe_only": true
+      },
+      "extraction": null
+    },
+    {
+      "id": "step_2",
+      "action": "click",
+      "risk": "read_only",
+      "locators": [
+        {
+          "strategy": "role",
+          "value": "Search",
+          "role": "button",
+          "scope": null,
+          "attribute": null,
+          "fragile": false
+        }
+      ],
+      "value": null,
+      "destination": null,
+      "preconditions": [],
+      "postconditions": [],
+      "wait": null,
+      "timeout_ms": 5000,
+      "retry": {
+        "max_attempts": 1,
+        "backoff_ms": 100,
+        "safe_only": true
+      },
+      "extraction": null
+    },
+    {
+      "id": "step_3",
+      "action": "click",
+      "risk": "read_only",
+      "locators": [
+        {
+          "strategy": "role",
+          "value": "Open member",
+          "role": "link",
+          "scope": null,
+          "attribute": null,
+          "fragile": false
+        }
+      ],
+      "value": null,
+      "destination": null,
+      "preconditions": [],
+      "postconditions": [],
+      "wait": null,
+      "timeout_ms": 5000,
+      "retry": {
+        "max_attempts": 1,
+        "backoff_ms": 100,
+        "safe_only": true
+      },
+      "extraction": null
+    },
+    {
+      "id": "step_4",
+      "action": "extract",
+      "risk": "read_only",
+      "locators": [
+        {
+          "strategy": "text",
+          "value": "$1,245.67",
+          "role": null,
+          "scope": "#accounts",
+          "attribute": null,
+          "fragile": false
+        }
+      ],
+      "value": null,
+      "destination": null,
+      "preconditions": [],
+      "postconditions": [],
+      "wait": null,
+      "timeout_ms": 5000,
+      "retry": {
+        "max_attempts": 1,
+        "backoff_ms": 100,
+        "safe_only": true
+      },
+      "extraction": {
+        "output": "savings_balance",
+        "value_type": "decimal",
+        "pattern": "[$,]"
+      }
+    }
+  ],
+  "checkpoint": {
+    "kind": "text_present",
+    "value": "Savings balance",
+    "locators": []
+  },
+  "business_outcomes": [
+    {
+      "code": "member_not_found",
+      "condition": {
+        "kind": "text_present",
+        "value": "No member found",
+        "locators": []
+      }
+    }
+  ],
+  "recoveries": [
+    {
+      "condition": {
+        "kind": "text_present",
+        "value": "Maintenance notice",
+        "locators": []
+      },
+      "action": "dismiss_dialog",
+      "max_attempts": 1
+    }
+  ],
+  "escalation_conditions": [
+    "policy_block",
+    "repeated_state",
+    "ambiguous_control",
+    "session_expired"
+  ],
+  "approval": {
+    "status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "provenance": {
+    "discovered_at": "2026-09-26T00:51:48.139245Z",
+    "model_provider": "offline-fixture",
+    "model_name": "offline-fake",
+    "run_id": "8c13cc63cf1f4ae69d6f233365c7d1ad",
+    "observation_sha256": "3000a9b416cf6d67bbc300a03d1bd7b9651622cb22f5b18ffb95b3d7f1f1dac7"
+  }
+}
