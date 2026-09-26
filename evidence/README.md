@@ -13,7 +13,10 @@ Evidence in this directory must come from commands, never hand-authored run clai
   history, including offline runs and genuine discovery experiments.
 - `replay.jsonl`, `replay-result.json`: deterministic browser replay; no model is constructed.
 - `not-found-result.json`: expected business outcome.
-- `handoff.txt`: same-session state-machine execution and sanitized acknowledgment.
+- `handoff.txt`: state-machine-only fixture; it does not prove a live browser takeover.
+- `live-handoff.jsonl` and `live-handoff-result.json`: real headful Playwright pause, human ownership,
+  and handback evidence from run `6460919019b6419ab2e91f41ef5e3ce5`. The unchanged session reference
+  and changed pre/post fingerprints demonstrate that the human operated the retained session.
 - `runtime/*-dom.txt`: richer sanitized failure signal when a run fails. Screenshots are disabled by
   default because this slice has no pixel-redaction pipeline.
 
@@ -25,7 +28,8 @@ cuauto discover --offline --output evidence/offline-capability.json
 cuauto replay evidence/offline-capability.json --member-id M1001
 cuauto replay evidence/offline-capability.json --member-id M9999 \
   --result evidence/not-found-result.json
-python scripts/handoff_demo.py --output evidence/handoff.txt
+cuauto handoff-demo --result evidence/live-handoff-result.json  # manual, visible browser
+python scripts/handoff_demo.py --output evidence/handoff.txt    # state-machine unit fixture only
 python scripts/make_error_fixture.py
 cuauto replay evidence/error-capability.json --member-id M1001 \
   --result evidence/error-result.json       # expected exit 2; redacted DOM is under runtime/

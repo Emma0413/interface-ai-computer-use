@@ -63,13 +63,21 @@ cuauto discover --offline --output evidence/offline-capability.json
 cuauto replay evidence/offline-capability.json --member-id M1001
 ```
 
-For manual takeover, run discovery with `--headful`. When an intervention is raised, automation is
-already in `PAUSING`; call `transfer_to_human` with the intervention's unguessable token, use the
-existing visible browser, then call `resume`. The tested manager rejects concurrent automation,
-cross-session, stale, duplicate, cancelled, and expired commands. This slice records the operator's
-sanitized completion note and transition events—not individual mouse/keyboard events. The state
-machine is directly demonstrated by
-`python scripts/handoff_demo.py --output evidence/handoff.txt`.
+For a real manual takeover, keep `cuauto serve-demo` running in terminal 1, then run this in terminal
+2:
+
+```bash
+cuauto handoff-demo --result evidence/live-handoff-result.json
+```
+
+A visible Chromium window opens. The command pauses automation before transferring control; operate
+that same window, return to the terminal, type `resume` (or `cancel`), and enter a short note. On
+resume it atomically returns ownership, re-observes the same session, and rechecks the current URL
+against policy. Evidence is written to `evidence/live-handoff.jsonl` and the result path above. The
+tested manager rejects concurrent automation, cross-session, stale, duplicate, cancelled, and
+expired commands. This records the operator's sanitized completion note and control transitions—not
+individual mouse or keyboard events. `scripts/handoff_demo.py` remains only a fast state-machine
+fixture and is not evidence of a live browser takeover.
 
 ## Verification
 

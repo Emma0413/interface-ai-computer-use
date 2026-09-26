@@ -4,9 +4,7 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-SECRET_KEYS = re.compile(
-    r"(?i)(password|passwd|secret|token|cookie|authorization|api[_-]?key|session[_-]?id)"
-)
+SECRET_KEYS = re.compile(r"(?i)(password|passwd|secret|token|cookie|authorization|api[_-]?key)")
 BEARER = re.compile(r"(?i)bearer\s+[a-z0-9._~+/=-]+")
 EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
 SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")

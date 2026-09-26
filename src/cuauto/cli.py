@@ -8,6 +8,7 @@ import typer
 from .demo_app import serve
 from .discovery import DiscoveryAgent, FakeDiscoveryModel, OpenAICompatibleModel
 from .events import EventRecorder
+from .handoff import LiveHandoffDemo, OperatorDecision
 from .intervention import InterventionManager
 from .models import ActionType, CapabilityArtifact
 from .policy import AllowedTarget, PolicyConfig, PolicyEngine
@@ -107,6 +108,50 @@ def replay(
             manager,
             Path("evidence/runtime"),
         ).run(loaded, {"member_id": member_id})
+        result.parent.mkdir(parents=True, exist_ok=True)
+        result.write_text(outcome.model_dump_json(indent=2), encoding="utf-8")
+        typer.echo(outcome.model_dump_json(indent=2))
+        if outcome.kind == "failure":
+            raise typer.Exit(2)
+    finally:
+        surface.close()
+
+
+@app.command("handoff-demo")
+def handoff_demo(
+    target: str = "http://127.0.0.1:8765/",
+    result: Path = Path("evidence/live-handoff-result.json"),
+) -> None:
+    """Transfer one live headful browser session to a human and back."""
+    policy, manager = demo_policy(), InterventionManager()
+    surface = PlaywrightSurface(policy, headless=False)
+    recorder = EventRecorder(Path("evidence/live-handoff.jsonl"), policy.config.pii_fields)
+
+    def operator_prompt(_item: object, live_message: str) -> OperatorDecision:
+        intervention = manager.current
+        if intervention is None:
+            raise RuntimeError("intervention disappeared before takeover")
+        typer.echo(f"\n{live_message}")
+        typer.echo(f"intervention: {intervention.intervention_id}")
+        typer.echo(f"reason: {intervention.reason}")
+        typer.echo(f"state: {intervention.sanitized_state}")
+        typer.echo("Operate the open browser now. Return here when finished.")
+        while True:
+            decision = typer.prompt("Type resume or cancel").strip().lower()
+            if decision in {"resume", "cancel"}:
+                break
+            typer.echo("Please type exactly 'resume' or 'cancel'.")
+        note = typer.prompt("Short completion note", default="operator completed review")
+        return OperatorDecision.model_validate({"action": decision, "note": note})
+
+    try:
+        outcome = LiveHandoffDemo(
+            surface,
+            policy,
+            recorder,
+            manager,
+            Path("evidence/runtime"),
+        ).run(target=target, operator=operator_prompt)
         result.parent.mkdir(parents=True, exist_ok=True)
         result.write_text(outcome.model_dump_json(indent=2), encoding="utf-8")
         typer.echo(outcome.model_dump_json(indent=2))

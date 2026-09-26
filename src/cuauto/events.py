@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -40,6 +41,9 @@ class EventRecorder:
 
     def record(self, **fields: Any) -> Event:
         fields["timestamp"] = fields.get("timestamp", datetime.now(UTC))
+        session_id = fields.get("session_id")
+        if isinstance(session_id, str):
+            fields["session_id"] = hashlib.sha256(session_id.encode()).hexdigest()[:20]
         clean = redact(fields, self.pii_fields)
         event = Event.model_validate(clean)
         line = event.model_dump_json() + "\n"

@@ -136,6 +136,28 @@ class InterventionManager:
             )
             return self._current
 
+    def fail(self, session_id: str, note: str) -> Intervention:
+        """Move the active intervention to a terminal failure after handback validation."""
+        with self._lock:
+            item = self._current
+            if item is None or item.session_id != session_id:
+                raise InterventionError("cross-session or missing intervention")
+            if item.state in {
+                ControlState.COMPLETED,
+                ControlState.CANCELLED,
+                ControlState.EXPIRED,
+                ControlState.FAILED,
+            }:
+                raise InterventionError("intervention is already terminal")
+            self._current = item.model_copy(
+                update={
+                    "state": ControlState.FAILED,
+                    "control_owner": "none",
+                    "acknowledgement": note[:500],
+                }
+            )
+            return self._current
+
     def _validate(self, intervention_id: str, token: str, session_id: str) -> Intervention:
         item = self._current
         if not item or not secrets.compare_digest(item.intervention_id, intervention_id):

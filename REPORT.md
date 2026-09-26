@@ -57,9 +57,10 @@ raise a sanitized intervention. The manager atomically moves `AUTOMATION_ACTIVE 
 HUMAN_ACTIVE → RESUMING → AUTOMATION_ACTIVE`, plus terminal cancellation/expiration states.
 Automation checks ownership before each replay action. Transfer binds an unpredictable token to the
 intervention and exact session; the same Playwright `Page` stays alive and a headful window is exposed.
-Resume rejects the wrong session/token, expiry, duplicates, and stale state. After handback the engine
-re-observes through its next condition/checkpoint and rechecks policy. Implemented capture is the
-operator's bounded acknowledgment and state transitions, not a misleading claim of raw input capture.
+The `cuauto handoff-demo` command exercises that live transfer directly. Resume rejects the wrong
+session/token, expiry, duplicates, and stale state. After handback the command re-observes the same
+surface and rechecks navigation policy before reporting success. Implemented capture is the operator's
+bounded acknowledgment and state transitions, not a misleading claim of raw input capture.
 
 # 6. Safety
 
@@ -87,4 +88,3 @@ network egress enforcement, visual redaction, frame/desktop adapters, per-keystr
 multi-tenant registry, and automatic artifact promotion. Next would be a tiny authenticated
 localhost operator console, signed approvals/artifacts, pinned egress, and a second accessibility/OS
 adapter—not distributed infrastructure.
-
